@@ -3,8 +3,6 @@
 A launcher for AdventureQuest Classic including some Quality of Life improvements.
 
 ## DISCLAIMER:
-
------
 I am not Artix Entertainment!  
 Now that I got your attention, I am a 3rd party developer unrelated to Artix Entertainment in any way, nor was this project endorsed by them.  
 This removes any responsibility for you using this launcher from Artix Entertainment.  
@@ -17,8 +15,6 @@ Same goes for me.
 No warranties, guaranties, USE AT YOUR OWN RISK!  
 
 ## Version 1.6
-
------
 In November 2023, I can across this launcher.  
 I have spent many hours to try to understand how it works and to update it.  
 This version kinda WORKS, but as it does not follow the [electron security guidelines](https://www.electronjs.org/docs/latest/tutorial/security),  
@@ -82,8 +78,6 @@ Start with:
 `npm start`
 
 ## ORIGINAL README:  
-
------
 <img src="https://i.imgur.com/hbVZDap.png" width="300" />  
 
 ## Features
