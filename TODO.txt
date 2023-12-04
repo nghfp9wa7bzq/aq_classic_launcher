@@ -1,0 +1,26 @@
+make a new js file for all menus
+  use that for menu.js and tray.js
+
+main.js returnPath() ??
+
+these tables are lazy loaded - find a way to get JSON data anyway
+https://www.battleon.com/Top/ZoneWins
+https://www.battleon.com/Top/ElfGold
+https://www.battleon.com/Top/ElfTokens
+
+
+let trayIcon = nativeImage.createFromPath(iconPath);
+trayIcon = trayIcon.resize({ width: 16, height: 16 });
+is this important? main.js
+
+check security
+nodeIntegration, contextIsolation, preload
+
+
+
+
+
+
+
+
+ 

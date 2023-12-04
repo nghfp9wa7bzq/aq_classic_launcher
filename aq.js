@@ -1,5 +1,17 @@
-const { ipcRenderer } = require("electron");
-const isDev = require("electron-is-dev");
+//const { ipcRenderer } = require("electron");
+//const isDev = require("electron-is-dev");
+const isDev = false;
+
+if (isDev) { console.log("aq.js start"); }
+
+// block execution for ms
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// use with:
+// sleep(2000).then(() => { console.log('Hello World!'); });
+
 
 class AQTabGroup {
   constructor(container) {
@@ -7,6 +19,9 @@ class AQTabGroup {
     this.multiscreen = false;
     this.server = "aq";
     this.tabs = new Map();
+
+    if (isDev) { console.log("AQTabGroup constructor"); }
+
     this.getGameVer()
       .then((version) => (this.version = version))
       .then(() => this.addTab())
@@ -29,12 +44,20 @@ class AQTabGroup {
     this.server = server;
   }
 
-  // get game version
+  // get game version from website
   getGameVer() {
     let url = `https://${this.server}.battleon.com/game/web`;
     let gamever = fetch(url)
       .then((response) => response.text())
       .then((html) => {
+
+/*
+      if (isDev) {
+        console.log("aq.js getGameVer() html:");
+        console.log(html);
+      }
+*/
+
         const parser = new DOMParser();
         return parser.parseFromString(html, "text/html");
       })
@@ -44,20 +67,30 @@ class AQTabGroup {
 
         return version;
       });
+
+      if (isDev) {
+        console.log("aq.js getGameVer() ver:");
+        console.log(gamever);
+      }
+
     return gamever;
   }
 
   // add tab
   addTab() {
+    // limit tabs to 6
     if (this.length >= 6) {
       return;
     }
+
+    // look for a free tab id
     let id = 0;
     for (let i = 0; i <= this.length; i++) {
       if (!this.tabs.has(i)) {
         id = i;
       }
     }
+
     let tab = new AQTab(id, this.version, this);
     this.tabs.set(id, tab);
     this.container.appendChild(tab.node);
@@ -80,7 +113,15 @@ class AQTabGroup {
     this.resize();
   }
 
+  // wait until ruffle loads child element
+  // we want to resize that too
   resize() {
+    if (isDev) { console.log("aq.js resize"); }
+    sleep(500).then(() => { this.resize2(); });
+  }
+
+  resize2() {
+    if (isDev) { console.log("aq.js resize2"); }
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -125,9 +166,25 @@ class AQTabGroup {
     let tab_height = max_height;
 
     this.tabs.forEach((element) => {
+
+      if (isDev) { 
+        console.log("aq.js AQTabGroup resize() forEach");
+        console.log(element);
+      }
+
       try {
         resizeContent(element.node, tab_height, tab_width);
-      } catch {
+
+        if (isDev) { 
+          console.log("aq.js AQTabGroup resize() forEach after try");
+          console.log(element.node);
+          console.log("tab_height: " + tab_height);
+          console.log("tab_width: " + tab_width);
+        }
+
+      } catch (e) {
+        console.log("aq.js AQTabGroup resize() forEach error:");
+        console.log(e);
         console.log(element);
       }
     });
@@ -144,6 +201,11 @@ class AQTab {
   createAQObject(id, version) {
     // get the server type
     let server = this.tabgroup.server;
+
+    if (isDev) { 
+      console.log("aq.js createAQObject");
+      console.log("server: " + server);
+    }
 
     // create the object
     let object = document.createElement("object");
@@ -221,11 +283,11 @@ class AQTab {
     closeButton.setAttribute("type", "button");
     closeButton.setAttribute("value", "x");
     closeButton.classList.add("tabCloseButton");
-    if (!global.aqtabs.multiscreen) {
+    if (!aqtabs.multiscreen) {
       closeButton.classList.add("invisible");
     }
     closeButton.onclick = () => {
-      global.aqtabs.removeTab(parseInt(tab.getAttribute("id")));
+      aqtabs.removeTab(parseInt(tab.getAttribute("id")));
     };
     tab.appendChild(closeButton);
 
@@ -239,7 +301,13 @@ class AQTab {
 }
 
 function resizeContent(obj, height, width) {
-  emb = obj.getElementsByTagName("embed")[0];
+  emb = obj.getElementsByTagName("ruffle-embed")[0];
+  if (isDev) {
+    console.log("aq.js resizeContent obj");
+    console.log(obj);
+    console.log("aq.js resizeContent emb");
+    console.log(emb);
+  }
   obj.style.height = height;
   obj.style.width = width;
   emb.style.height = height;
@@ -247,12 +315,10 @@ function resizeContent(obj, height, width) {
 }
 
 function reduceScreenCount(e) {
-  let aqtabs = global.aqtabs;
   aqtabs.removeTab(aqtabs.length - 1);
 }
 
 function increaseScreenCount(e) {
-  let aqtabs = global.aqtabs;
   aqtabs.addTab();
 }
 
@@ -260,33 +326,45 @@ function localToggleMultiscreen() {
   let multiscreenButton = document.getElementsByClassName(
     "multiscreenPopup"
   )[0];
+  // show + button, show X buttons
   if (multiscreenButton.classList.contains("invisible")) {
     multiscreenButton.classList.remove("invisible");
 
     let closeButton = document.getElementsByClassName("tabCloseButton")[0];
     closeButton.classList.remove("invisible");
-    global.aqtabs.multiscreen = true;
+    aqtabs.multiscreen = true;
+  // hide button
   } else {
     multiscreenButton.classList.add("invisible");
-    while (global.aqtabs.length > 1) {
-      aqtabs.removeTab(global.aqtabs.length - 1);
+    // remove all tabs, except the first one
+    while (aqtabs.length > 1) {
+      aqtabs.removeTab(aqtabs.length - 1);
     }
 
     let closeButton = document.getElementsByClassName("tabCloseButton")[0];
     closeButton.classList.add("invisible");
-    global.aqtabs.multiscreen = false;
+    aqtabs.multiscreen = false;
   }
 }
 
 function localChangeServer(server) {
-  global.aqtabs.setServer(server);
+  aqtabs.setServer(server);
 
-  for (let i = global.aqtabs.length - 1; i >= 0; i--) {
-    aqtabs.removeTab(global.aqtabs.length - 1);
+  for (let i = aqtabs.length - 1; i >= 0; i--) {
+    aqtabs.removeTab(aqtabs.length - 1);
   }
 }
 
-document.body.onload = () => {
+let aqtabs;
+
+window.onload = () => {
+  if (isDev) { console.log("aq.js onload"); }
+
   let container = document.getElementById("container");
-  global.aqtabs = new AQTabGroup(container);
+  aqtabs = new AQTabGroup(container);
+
+  document.body.onresize = () => {
+    console.log("aq.js onresize")
+    aqtabs.resize()
+  };
 };

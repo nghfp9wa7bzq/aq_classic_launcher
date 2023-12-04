@@ -8,20 +8,12 @@
       content="script-src 'self' 'unsafe-inline'"
     />
 
-    <link
-      rel="stylesheet"
-      href="node_modules/electron-tabs/electron-tabs.css"
-    />
-    <link rel="stylesheet" href="node_modules/dragula/dist/dragula.css" />
     <link rel="stylesheet" href="index.css" />
   </head>
 
   <body style="margin: 0">
-    <div class="etabs-tabgroup">
-      <div class="etabs-tabs"></div>
-      <div class="etabs-buttons"></div>
-      <div id="serverSelector"></div>
-    </div>
+    <tab-group new-tab-button="true" sortable="true"></tab-group>
+    <div id="serverSelector"></div>
     <div id="copyClipboard" style="display: none"></div>
 
     <div id="menuPopup" class="menuPopup" visibility="true">
@@ -62,28 +54,28 @@
           <div class="link">
             <a
               href="#"
-              onclick="openInfoTab('Warzone', 'https://www.battleon.com/aq-warzone.asp', null, createWarzoneInfo)"
+              onclick="openInfoTab('Warzone', 'https://www.battleon.com/TopWarWins', null, createWarzoneInfo)"
               >Official War Leaderboard</a
             >
           </div>
           <div class="link">
             <a
               href="#"
-              onclick="openInfoTab('Knights of Discord', 'http://aqknightsofdiscord.herokuapp.com/')"
+              onclick="openInfoTab('Knights of Discord', 'https://discord.com/invite/tXmn2sE')"
               >Knights of Discord Leaderboard</a
             >
           </div>
           <div class="link">
             <a
               href="#"
-              onclick="openInfoTab('Token Donation Leaderboard', 'https://www.battleon.com/aq-elftokens.asp','elfToken', createElfInfo)"
+              onclick="openInfoTab('Token Donation Leaderboard', 'https://www.battleon.com/TopElfTokens','elfToken', createElfInfo)"
               >Token Donation Leaderboard</a
             >
           </div>
           <div class="link">
             <a
               href="#"
-              onclick="openInfoTab('Gold Donation Leaderboard', 'https://www.battleon.com/aq-elfgold.asp','elfGold', createElfInfo)"
+              onclick="openInfoTab('Gold Donation Leaderboard', 'https://www.battleon.com/TopElfGold','elfGold', createElfInfo)"
               >Gold Donation Leaderboard</a
             >
           </div>

@@ -6,16 +6,19 @@ const {
   globalShortcut,
   MenuItem,
   ipcMain,
+  nativeImage
 } = require("electron");
-const isDev = require("electron-is-dev");
+const isDev = false;
 const path = require("path");
 const fs = require("fs");
+const createMenu = require(path.join(__dirname, '/modules/menu.js'));
+const createSystemTray = require(path.join(__dirname, '/modules/tray.js'));
 
 let pluginName;
 let iconName;
 switch (process.platform) {
   case "win32":
-    iconName = "\\resources\\Favicon.ico";
+    iconName = "\\resources\\Favicon.png";
     if (process.arch == "ia32") {
       // Pepper Flash Player 32-bit 32_0_0_371
       pluginName = "\\resources\\pepflashplayer_32.dll";
@@ -26,11 +29,11 @@ switch (process.platform) {
     break;
   case "darwin":
     // Plugin not updated
-    iconName = "/resources/Favicon.ico";
+    iconName = "/resources/Favicon.png";
     pluginName = "/resources/PepperFlashPlayer.plugin";
     break;
   case "linux":
-    iconName = "/resources/Favicon.ico";
+    iconName = "/resources/Favicon.png";
     if (process.arch == "ia32") {
       // Plugin not updated
       pluginName = "/resources/libpepflashplayer_32.so";
@@ -52,6 +55,8 @@ let iconPath = process.env.ELECTRON_START_URL
   ? path.join(__dirname, iconName)
   : __dirname.replace("app.asar", "app.asar.unpacked") + iconName;
 
+let icon = nativeImage.createFromPath(iconPath);
+
 function returnPath() {
   return pluginPath;
 }
@@ -62,8 +67,6 @@ ipcMain.on("asynchronous-message", (event, arg) => {
 
 app.commandLine.appendSwitch("ppapi-flash-path", pluginPath);
 
-let tray;
-
 function createWindow() {
   const { screen } = require("electron");
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -72,14 +75,15 @@ function createWindow() {
   let s_width = (s_height * 4) / 3;
 
   const win = new BrowserWindow({
-    icon: iconPath,
+    icon: icon,
     show: false,
     height: s_height + 61,
     width: s_width,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     webPreferences: {
+//      preload: path.join(__dirname, 'index.js'),
       nodeIntegration: true,
-      plugins: true,
+      contextIsolation: false,
       webviewTag: true,
     },
   });
@@ -98,134 +102,20 @@ function createWindow() {
   return win;
 }
 
-function createSystemTray(win) {
-  tray = new Tray(iconPath);
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "Reload",
-      type: "normal",
-      click: (item, window, event) => {
-        win.webContents.send("hotkey", "reload");
-      },
-    },
-    {
-      label: "Clear Cache",
-      type: "normal",
-      click: (item, window, event) => {
-        win.webContents.session.clearCache(function () {
-          win.webContents.session.getCacheSize((value) => {
-            if (isDev) {
-              console.log(value);
-            }
-          });
-        });
-      },
-    },
-    {
-      label: "Reload + Clear Cache",
-      type: "normal",
-      click: (item, window, event) => {
-        win.webContents.session.clearCache(function () {
-          win.webContents.session.getCacheSize((value) => {
-            if (isDev) {
-              console.log(value);
-            }
-          });
-        });
-        win.webContents.send("hotkey", "reload");
-      },
-    },
-    {
-      label: "Exit",
-      type: "normal",
-      click: (item, window, event) => {
-        if (process.platform == "win32") {
-          tray.destroy();
-        }
-        app.quit();
-      },
-    },
-  ]);
-  tray.setToolTip("This is my application.");
-  tray.setContextMenu(contextMenu);
-}
+let tray;
 
-function createMenu(win) {
-  const menu = new Menu();
-  menu.append(
-    new MenuItem({
-      label: "Options",
-      submenu: [
-        {
-          label: "Reload",
-          type: "normal",
-          accelerator: "F5",
-          click: (item, window, event) => {
-            win.webContents.send("hotkey", "reload");
-          },
-        },
-        {
-          label: "Clear Cache",
-          type: "normal",
-          accelerator: "F4",
-          click: (item, window, event) => {
-            win.webContents.session.clearCache(function () {
-              win.webContents.session.getCacheSize((value) => {
-                if (isDev) {
-                  console.log(value);
-                }
-              });
-            });
-          },
-        },
-        {
-          label: "Reload + Clear Cache",
-          type: "normal",
-          accelerator: process.platform === "darwin" ? "Cmd+F5" : "Ctrl+F5",
-          click: (item, window, event) => {
-            win.webContents.session.clearCache(function () {
-              win.webContents.session.getCacheSize((value) => {
-                if (isDev) {
-                  console.log(value);
-                }
-              });
-            });
-            win.webContents.send("hotkey", "reload");
-          },
-        },
-        {
-          label: "Toggle Fullscreen",
-          type: "normal",
-          accelerator: "F11",
-          click: (item, window, event) => {
-            if (win.isFullScreen()) {
-              win.setFullScreen(false);
-            } else {
-              win.setFullScreen(true);
-            }
-          },
-        },
-        {
-          label: "Open Developer Tools",
-          type: "normal",
-          accelerator:
-            process.platform === "darwin" ? "Cmd+Shift+I" : "Ctrl+Shift+I",
-          click: (item, window, event) => {
-            //win.webContents.openDevTools();
-            win.webContents.send("hotkey", "devtools");
-          },
-        },
-      ],
-    })
-  );
-
-  Menu.setApplicationMenu(menu);
-}
-
-app.on("ready", () => {
+app.whenReady().then(() => {
   win = createWindow();
-  if (process.platform == "win32") {
-    createSystemTray(win);
+  
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  })
+  
+  if ((process.platform == "win32")
+    || (process.platform == "linux")) {
+    tray = createSystemTray(win, icon);
   }
   createMenu(win);
 });
@@ -233,18 +123,14 @@ app.on("ready", () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     try {
-      if (process.platform == "win32") {
+      if ((process.platform == "win32")
+        || (process.platform == "linux")) {
         tray.destroy();
       }
     } catch (e) {
-      console.log("incorrect platform.");
+      console.log("error in tray destroy");
+      console.log(e);
     }
     app.quit();
-  }
-});
-
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
   }
 });
