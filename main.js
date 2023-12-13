@@ -11,61 +11,23 @@ const {
 const isDev = false;
 const path = require("path");
 const fs = require("fs");
-const createMenu = require(path.join(__dirname, '/modules/menu.js'));
-const createSystemTray = require(path.join(__dirname, '/modules/tray.js'));
+const createMenu = require(path.join(__dirname, "/modules/menu.js"));
+const createSystemTray = require(path.join(__dirname, "/modules/tray.js"));
 
-let pluginName;
+
 let iconName;
-switch (process.platform) {
-  case "win32":
-    iconName = "\\resources\\Favicon.png";
-    if (process.arch == "ia32") {
-      // Pepper Flash Player 32-bit 32_0_0_371
-      pluginName = "\\resources\\pepflashplayer_32.dll";
-    } else {
-      // Pepper Flash Player 64-bit 32_0_0_371
-      pluginName = "\\resources\\pepflashplayer_64.dll";
-    }
-    break;
-  case "darwin":
-    // Plugin not updated
-    iconName = "/resources/Favicon.png";
-    pluginName = "/resources/PepperFlashPlayer.plugin";
-    break;
-  case "linux":
-    iconName = "/resources/Favicon.png";
-    if (process.arch == "ia32") {
-      // Plugin not updated
-      pluginName = "/resources/libpepflashplayer_32.so";
-    } else if (process.arch == "armv7l") {
-      // Plugin not updated
-      pluginName = "/resources/libpepflashplayer_armv7l.so";
-    } else {
-      // Plugin not updated
-      pluginName = "/resources/libpepflashplayer_64.so";
-    }
-    break;
-}
 
-let pluginPath = process.env.ELECTRON_START_URL
-  ? path.join(__dirname, pluginName)
-  : __dirname.replace("app.asar", "app.asar.unpacked") + pluginName;
+if (process.platform == "win32") {
+  iconName = "\\resources\\Favicon.png";
+} else {
+  iconName = "/resources/Favicon.png";
+}
 
 let iconPath = process.env.ELECTRON_START_URL
   ? path.join(__dirname, iconName)
   : __dirname.replace("app.asar", "app.asar.unpacked") + iconName;
 
 let icon = nativeImage.createFromPath(iconPath);
-
-function returnPath() {
-  return pluginPath;
-}
-
-ipcMain.on("asynchronous-message", (event, arg) => {
-  event.sender.send("asynchronous-reply", returnPath());
-});
-
-app.commandLine.appendSwitch("ppapi-flash-path", pluginPath);
 
 function createWindow() {
   const { screen } = require("electron");
@@ -81,9 +43,9 @@ function createWindow() {
     width: s_width,
     autoHideMenuBar: false,
     webPreferences: {
-//      preload: path.join(__dirname, 'index.js'),
-      nodeIntegration: true,
-      contextIsolation: false,
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
       webviewTag: true,
     },
   });
@@ -107,7 +69,7 @@ let tray;
 app.whenReady().then(() => {
   win = createWindow();
   
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }

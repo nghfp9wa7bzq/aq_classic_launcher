@@ -1,64 +1,4 @@
-const { ipcRenderer, session } = require("electron");
-//const isDev = require("electron-is-dev");
 const isDev = false;
-const TabGroup = require("electron-tabs");
-//const dragula = require("dragula");
-const path = require("path");
-const {
-  togglePopup,
-  toggleMenuVisibility,
-  createFloatingObject,
-  createFirebaseInfo,
-  createWarzoneInfo,
-  createElfInfo
-  } = require(path.join(__dirname, '/modules/popupmenu.js'));
-
-//console.log(createSystemTray());
-/*
-function dragElement(element) {
-  let pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0;
-  if (document.getElementById(element.id + "Header")) {
-    // if present, the header is where you move the DIV from:
-    document.getElementById(element.id + "Header").onmousedown = dragMouseDown;
-  } else {
-    // otherwise, move the DIV from anywhere inside the DIV:
-    element.onmousedown = dragMouseDown;
-  }
-
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    element.style.top = element.offsetTop - pos2 + "px";
-    element.style.left = element.offsetLeft - pos1 + "px";
-  }
-
-  function closeDragElement() {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-*/
 
 
 function getTitle(url) {
@@ -158,14 +98,14 @@ function getActiveTabView() {
 function toggleMultiscreen() {
   let button = document.getElementById("multiscreenToggle");
 
-  if (isDev) {
-    console.log("multiscreenToggle to: " + button.getAttribute("state"));
-  }
-
   if (button.getAttribute("state") == "Off") {
     button.setAttribute("state", "On");
   } else {
     button.setAttribute("state", "Off");
+  }
+
+  if (isDev) {
+    console.log("multiscreenToggle to: " + button.getAttribute("state"));
   }
 
   getActiveTabView().executeJavaScript("localToggleMultiscreen()");
@@ -189,16 +129,10 @@ function createTab() {
     title: "AdventureQuest",
     src: "aq.html",
     active: true,
-    webviewAttributes: {
-      nodeintegration: "nodeintegration"
-    },
     closable: true,
     ready: navigate,
   };
 }
-
-//console.log(tabGroup)
-tabGroup.setDefaultTab(createTab());
 
 function setClipboardArea(tab) {
   let clipboard_area = document.getElementById("copyClipboard");
@@ -276,40 +210,40 @@ function setSelectedServer(tab) {
   }
 }
 
-tabGroup.on("tab-active", (tab, tabGroup) => {
-  setClipboardArea(tab);
-  setSelectedServer(tab);
-});
+// the electron-tabs.js is loaded from the index.html
+window.onload = () => {
+  if (isDev) { console.log("index.js onload"); }
 
-// auto-add a new tab if all tabs are removed
-tabGroup.on("tab-removed", (tab, tabGroup) => {
-  if (isDev) {
-    console.log(tabGroup.getTabs());
-  }
-  if (tabGroup.getTabs().length == 0) {
-    tabGroup.addTab(createTab());
-  }
-});
+  // create initial tab
+  tabGroup.setDefaultTab(createTab());
+  tabGroup.addTab(createTab());
 
-// create initial tab
-tabGroup.addTab(createTab());
+  tabGroup.on("tab-active", (tab, tabGroup) => {
+    setClipboardArea(tab);
+    setSelectedServer(tab);
+  });
 
-ipcRenderer.on("hotkey", (event, message) => {
-//  let webview = document.querySelector("webview.visible");
-  let webview = getActiveTabView();
+  // auto-add a new tab if all tabs are removed
+  tabGroup.on("tab-removed", (tab, tabGroup) => {
+    if (isDev) {
+      console.log(tabGroup.getTabs());
+    }
+    if (tabGroup.getTabs().length == 0) {
+      tabGroup.addTab(createTab());
+    }
+  });
 
-  switch (message) {
-    case "reload":
-      webview.reload();
-      break;
-    case "devtools":
-      webview.openDevTools();
-      break;
-  }
-});
+  // using contextBridge to add an eventlistener for menu actions
+  myAPI.onHotkey((message) => {
+    let webview = getActiveTabView();
 
-ipcRenderer.on("asynchronous-reply", (event, arg) => {
-  console.log(arg);
-});
-
-ipcRenderer.send("asynchronous-message");
+    switch (message) {
+      case "reload":
+        webview.reload();
+        break;
+      case "devtools":
+        webview.openDevTools();
+        break;
+    }
+  });
+};

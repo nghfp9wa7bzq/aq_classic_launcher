@@ -11,17 +11,24 @@ Be sure you're **completely** aware of that before using it.
 Thanks,  
 Nivp.  
 
-Same goes for me.    
+Same goes for me.  
 No warranties, guaranties, USE AT YOUR OWN RISK!  
 
+## Version 1.8
+This version is safer.  
+I have used the Electron docs and changed some settings.  
+Of course as we are dealing with the web, [it can never be safe](https://www.electronjs.org/docs/latest/tutorial/sandbox#a-note-on-rendering-untrusted-content).
+  
+After some digging, I don't think this project can be done without the use of Electron or something similar.  
+(i.e. only using a JS and a HTML file - making it a lot simpler)  
+Mostly because [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
+
+
 ## Version 1.6
-In November 2023, I can across this launcher.  
+In November 2023, I came across this launcher.  
 I have spent many hours to try to understand how it works and to update it.  
 This version kinda WORKS, but as it does not follow the [electron security guidelines](https://www.electronjs.org/docs/latest/tutorial/security),  
 I would consider it UNSAFE.  
-  
-NOTE that this version is abandoned,  
-after I have realised that electron is probably not needed at all.  
   
 ### How it worked:  
 "Electron embeds Chromium and Node.js to enable web developers to create desktop applications."  
@@ -42,7 +49,7 @@ You can just install it into your browser and play flash games again.
 Some game sites load it automatically for you.  
   
 So I could have loaded the ruffle extension for Chromium into this project,  
-but that would have been harder and thankfully Ruffle can be loaded as like any other JS library.    
+but that would have been harder and thankfully Ruffle can be loaded just like any other JS library.    
 (At this point, I thought, why use electron?  
 I could just as easily make a HTML file and a JS file that load Ruffle.  
 You could just open this in any browser.)  
@@ -61,6 +68,7 @@ Using 4 browser windows seems to do a bit better...
   
 NOTE right now with Firefox the Ruffle plugin 'lingers' after closing the game tab.  
 This is using CPU unnecessarily.  
+(I mean instead of using this project.)  
 NOTE Ruffle is a WIP - work in progress.  
 There may be issues with playing flash content.  
 I have found that sometimes you can't kill a monster.  
@@ -71,8 +79,8 @@ Hopefully these problems will be fixed soon.
   
 NOTE all this has ONLY been tested on Debian 12 linux.  
   
-First install Node.js (and npm).
-Install this project with:  
+First install Node.js (and npm).  
+Install this project with: (inside the downloaded project folder)  
 `npm install`  
 Start with:  
 `npm start`

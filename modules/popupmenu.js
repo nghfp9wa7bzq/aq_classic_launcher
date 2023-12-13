@@ -1,6 +1,7 @@
-const { ipcRenderer, session } = require("electron");
-const path = require("path");
-const generateInfo = require(path.join(__dirname, 'geninfo.js'));
+// this gets loaded in the index.html
+//const { ipcRenderer, session } = require("electron");
+//const path = require("path");
+//const generateInfo = require(path.join(__dirname, 'geninfo.js'));
 
 // When the user clicks on div, open the popup
 function togglePopup() {
@@ -211,7 +212,7 @@ function createElfInfo(url, name) {
       return 0;
     });
 }
-
+/*
 module.exports = {
   togglePopup,
   toggleMenuVisibility,
@@ -220,23 +221,4 @@ module.exports = {
   createWarzoneInfo,
   createElfInfo
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+*/

@@ -1,5 +1,3 @@
-//const { ipcRenderer } = require("electron");
-//const isDev = require("electron-is-dev");
 const isDev = false;
 
 if (isDev) { console.log("aq.js start"); }
@@ -50,14 +48,6 @@ class AQTabGroup {
     let gamever = fetch(url)
       .then((response) => response.text())
       .then((html) => {
-
-/*
-      if (isDev) {
-        console.log("aq.js getGameVer() html:");
-        console.log(html);
-      }
-*/
-
         const parser = new DOMParser();
         return parser.parseFromString(html, "text/html");
       })

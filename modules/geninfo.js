@@ -1,4 +1,5 @@
-const { ipcRenderer, session } = require("electron");
+// this gets loaded in the index.html
+//const { ipcRenderer, session } = require("electron");
 
 function generateInfo(charDetails) {
   response = "";
@@ -228,32 +229,5 @@ function generateInfo(charDetails) {
   return response;
 }
 
-module.exports = generateInfo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//module.exports = generateInfo
 
