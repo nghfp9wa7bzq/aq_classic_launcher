@@ -14,6 +14,22 @@ Nivp.
 Same goes for me.  
 No warranties, guaranties, USE AT YOUR OWN RISK!  
 
+-----
+  
+**NOTE:** It is a lot easier to just install a Ruffle plugin for your browser and use that to play AQ.  
+
+**NOTE:** Right now Ruffle has some issues with AQ.  
+  
+ - Enemies may go down to 1 HP, but don't actually die.  
+ - Special triggers from monsters may persist across battles.  
+   (Say, a monster reduces damage by 5. Next monster does the same, regardless of monster type / name.)
+ - Over time, the game becomes slow / FPS goes down.  
+   This is very noticeable in multiscreen mode.  
+  
+These can be fixed by reloading the page / plugin and logging in again.  
+  
+-----
+  
 ## Version 1.8
 This version is safer.  
 I have used the Electron docs and changed some settings.  
